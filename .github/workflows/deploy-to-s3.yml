@@ -3,26 +3,22 @@ name: Upload to S3
 on:
   push:
     branches:
-      - main  # Trigger the action when changes are pushed to the main branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Run the job on an Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2: Configure AWS credentials using GitHub Secrets
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Ensure this secret is added to your repo
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Ensure this secret is added to your repo
-          aws-region: us-east-1  # Set the AWS region (change if needed)
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      # Step 3: Upload files to S3
       - name: Upload Files to S3
-        run: |
-          aws s3 sync . s3://your-s3-bucket-name --exclude ".git/*"  # Replace with your S3 bucket name
+        run: aws s3 sync . s3://your-s3-bucket-name --exclude ".git/*"
