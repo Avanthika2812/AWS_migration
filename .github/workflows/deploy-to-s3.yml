@@ -21,4 +21,4 @@ jobs:
           aws-region: us-east-1
 
       - name: Upload Files to S3
-        run: aws s3 sync . s3://your-s3-bucket-name --exclude ".git/*"
+        run: aws s3 sync . s3://myawsmigrate1 --exclude ".git/*"
