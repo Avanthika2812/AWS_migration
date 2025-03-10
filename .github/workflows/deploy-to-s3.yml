@@ -1,4 +1,4 @@
-name: Simple S3 Upload
+name: Upload to S3
 on:
   push:
     branches:
@@ -7,23 +7,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Debug secret availability
-        run: |
-          if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-            echo "AWS_ACCESS_KEY_ID is available"
-          else
-            echo "AWS_ACCESS_KEY_ID is missing"
-          fi
-          if [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY is available"
-          else
-            echo "AWS_SECRET_ACCESS_KEY is missing"
-          fi
-
-      - name: Deploy to S3 using jakejarvis/s3-sync-action
+      
+      - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
         env:
           AWS_S3_BUCKET: myawsmigrate1
