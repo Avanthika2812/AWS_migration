@@ -71,9 +71,9 @@ jobs:
         git archive --format=zip --output="${ARCHIVE_NAME}" HEAD
         echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
     
-    - name: Verify and print S3 bucket name
+    - name: Print S3 Bucket Name
       run: |
-        echo "S3 Bucket: ${AWS_S3_BUCKET}"
+        echo "S3_BUCKET: '${AWS_S3_BUCKET}'"
         if [ -z "$AWS_S3_BUCKET" ]; then
           echo "❌ AWS_S3_BUCKET is empty"
           exit 1
@@ -82,7 +82,7 @@ jobs:
         fi
       env:
         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-    
+
     - name: Upload to S3
       run: |
         echo "Uploading to s3://${AWS_S3_BUCKET}/${ARCHIVE_NAME}..."
