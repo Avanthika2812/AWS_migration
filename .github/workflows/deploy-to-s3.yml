@@ -1,25 +1,23 @@
-- name: Debug AWS Credentials
-  run: |
-    echo "Checking AWS_ACCESS_KEY_ID..."
-    if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-      echo "✅ AWS_ACCESS_KEY_ID is set"
-    else
-      echo "❌ AWS_ACCESS_KEY_ID is NOT set"
-      exit 1
-    fi
-    
-    echo "Checking AWS_SECRET_ACCESS_KEY..."
-    if [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-      echo "✅ AWS_SECRET_ACCESS_KEY is set"
-    else
-      echo "❌ AWS_SECRET_ACCESS_KEY is NOT set"
-      exit 1
-    fi
-    
-    echo "Checking AWS_REGION..."
-    if [ -n "${{ secrets.AWS_REGION }}" ]; then
-      echo "✅ AWS_REGION is set"
-    else
-      echo "❌ AWS_REGION is NOT set"
-      exit 1
-    fi
+name: Upload to S3
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set AWS credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
+          echo "AWS_S3_BUCKET=myawsmigrate1" >> $GITHUB_ENV
+      
+      - name: Deploy to S3
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          SOURCE_DIR: '.'
