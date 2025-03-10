@@ -14,23 +14,23 @@ jobs:
       - name: Check Secret Availability
         run: |
           if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-            echo "✅ AWS_ACCESS_KEY_ID is available (masked for security)"
+            echo "[PASS] AWS_ACCESS_KEY_ID is available (masked for security)"
           else
-            echo "❌ AWS_ACCESS_KEY_ID is NOT available"
+            echo "[FAIL] AWS_ACCESS_KEY_ID is NOT available"
             exit 1
           fi
           
           if [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "✅ AWS_SECRET_ACCESS_KEY is available (masked for security)"
+            echo "[PASS] AWS_SECRET_ACCESS_KEY is available (masked for security)"
           else
-            echo "❌ AWS_SECRET_ACCESS_KEY is NOT available"
+            echo "[FAIL] AWS_SECRET_ACCESS_KEY is NOT available"
             exit 1
           fi
           
           if [ -n "${{ secrets.AWS_REGION }}" ]; then
-            echo "✅ AWS_REGION is available: ${{ secrets.AWS_REGION }}"
+            echo "[PASS] AWS_REGION is available: ${{ secrets.AWS_REGION }}"
           else
-            echo "❌ AWS_REGION is NOT available"
+            echo "[FAIL] AWS_REGION is NOT available"
             exit 1
           fi
       
@@ -44,22 +44,22 @@ jobs:
       - name: Verify Environment Variables
         run: |
           if [ -n "$AWS_ACCESS_KEY_ID" ]; then
-            echo "✅ AWS_ACCESS_KEY_ID environment variable is set"
+            echo "[PASS] AWS_ACCESS_KEY_ID environment variable is set"
           else
-            echo "❌ AWS_ACCESS_KEY_ID environment variable is NOT set"
+            echo "[FAIL] AWS_ACCESS_KEY_ID environment variable is NOT set"
             exit 1
           fi
           
           if [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
-            echo "✅ AWS_SECRET_ACCESS_KEY environment variable is set"
+            echo "[PASS] AWS_SECRET_ACCESS_KEY environment variable is set"
           else
-            echo "❌ AWS_SECRET_ACCESS_KEY environment variable is NOT set"
+            echo "[FAIL] AWS_SECRET_ACCESS_KEY environment variable is NOT set"
             exit 1
           fi
           
           if [ -n "$AWS_REGION" ]; then
-            echo "✅ AWS_REGION is set: $AWS_REGION"
+            echo "[PASS] AWS_REGION is set: $AWS_REGION"
           else
-            echo "❌ AWS_REGION is NOT set"
+            echo "[FAIL] AWS_REGION is NOT set"
             exit 1
           fi
