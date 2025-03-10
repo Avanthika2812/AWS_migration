@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -10,14 +11,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      - name: Set AWS credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
-          echo "AWS_S3_BUCKET=myawsmigrate1" >> $GITHUB_ENV
-      
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete  # Optional: Deletes files in S3 not in repo
         env:
-          SOURCE_DIR: '.'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+          AWS_S3_BUCKET: myawsmigrate1
+          SOURCE_DIR: '.'  # Set source directory for upload
