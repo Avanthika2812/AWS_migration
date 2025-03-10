@@ -56,7 +56,13 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-    
+
+    - name: Set up AWS CLI credentials
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws configure set region ${{ secrets.AWS_REGION }}
+
     - name: Create archive of repository
       run: |
         REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
@@ -69,12 +75,7 @@ jobs:
       run: |
         aws s3 cp "${ARCHIVE_NAME}" "s3://${AWS_S3_BUCKET}/${ARCHIVE_NAME}"
         echo "✅ Successfully uploaded ${ARCHIVE_NAME} to s3://${AWS_S3_BUCKET}/"
-      env:
-        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-    
+
     - name: Create repository metadata file
       run: |
         REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
