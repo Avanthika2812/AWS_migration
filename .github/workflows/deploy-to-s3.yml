@@ -1,76 +1,99 @@
-name: Debug AWS Credentials
+name: Migrate GitHub Repository to S3
+
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:  # Allows manual triggering
+
 jobs:
-  debug:
+  migrate-to-s3:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Debug GitHub Secrets
-        run: |
-          echo "Checking if GitHub secrets exist:"
-          if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-            echo "AWS_ACCESS_KEY_ID secret exists"
-          else
-            echo "AWS_ACCESS_KEY_ID secret is missing or empty"
-          fi
-          
-          if [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY secret exists"
-          else
-            echo "AWS_SECRET_ACCESS_KEY secret is missing or empty"
-          fi
-          
-          if [ -n "${{ secrets.AWS_REGION }}" ]; then
-            echo "AWS_REGION secret exists"
-          else
-            echo "AWS_REGION secret is missing or empty"
-          fi
-          
-      - name: Check if secrets can be assigned to environment variables
-        env:
-          KEY_TEST: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          SECRET_TEST: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          REGION_TEST: ${{ secrets.AWS_REGION }}
-        run: |
-          echo "Testing environment variable assignment:"
-          if [ -n "$KEY_TEST" ]; then
-            echo "Successfully assigned AWS_ACCESS_KEY_ID to environment variable"
-          else
-            echo "Failed to assign AWS_ACCESS_KEY_ID to environment variable"
-          fi
-          
-          if [ -n "$SECRET_TEST" ]; then
-            echo "Successfully assigned AWS_SECRET_ACCESS_KEY to environment variable"
-          else
-            echo "Failed to assign AWS_SECRET_ACCESS_KEY to environment variable"
-          fi
-          
-          if [ -n "$REGION_TEST" ]; then
-            echo "Successfully assigned AWS_REGION to environment variable"
-          else
-            echo "Failed to assign AWS_REGION to environment variable"
-          fi
-      
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-          aws --version
-      
-      - name: Verify AWS Credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          echo "Attempting to validate AWS credentials by calling AWS API:"
-          if aws sts get-caller-identity; then
-            echo "✅ AWS credentials are valid and working"
-            echo "AWS Account ID: $(aws sts get-caller-identity --query 'Account' --output text)"
-            echo "AWS User ARN: $(aws sts get-caller-identity --query 'Arn' --output text)"
-          else
-            echo "❌ AWS credentials validation failed. Please check your credentials."
-          fi
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for all branches and tags
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
+    - name: Install AWS CLI
+      run: |
+        pip install awscli
+    
+    - name: Verify AWS credentials
+      run: |
+        echo "Checking if AWS credentials exist:"
+        if [ -n "$AWS_ACCESS_KEY_ID" ]; then
+          echo "✅ AWS_ACCESS_KEY_ID secret exists"
+        else
+          echo "❌ AWS_ACCESS_KEY_ID secret is missing or empty"
+          exit 1
+        fi
+        if [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+          echo "✅ AWS_SECRET_ACCESS_KEY secret exists"
+        else
+          echo "❌ AWS_SECRET_ACCESS_KEY secret is missing or empty"
+          exit 1
+        fi
+        if [ -n "$AWS_REGION" ]; then
+          echo "✅ AWS_REGION secret exists"
+        else
+          echo "❌ AWS_REGION secret is missing or empty"
+          exit 1
+        fi
+        if [ -n "$AWS_S3_BUCKET" ]; then
+          echo "✅ AWS_S3_BUCKET secret exists"
+        else
+          echo "❌ AWS_S3_BUCKET secret is missing or empty"
+          exit 1
+        fi
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+    
+    - name: Create archive of repository
+      run: |
+        REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
+        TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+        ARCHIVE_NAME="${REPO_NAME}-${TIMESTAMP}.zip"
+        git archive --format=zip --output="${ARCHIVE_NAME}" HEAD
+        echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
+    
+    - name: Upload to S3
+      run: |
+        aws s3 cp "${ARCHIVE_NAME}" "s3://${AWS_S3_BUCKET}/${ARCHIVE_NAME}"
+        echo "✅ Successfully uploaded ${ARCHIVE_NAME} to s3://${AWS_S3_BUCKET}/"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+    
+    - name: Create repository metadata file
+      run: |
+        REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
+        TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+        METADATA_FILE="metadata-${TIMESTAMP}.json"
+        
+        echo '{' > $METADATA_FILE
+        echo "  \"repository\": \"$GITHUB_REPOSITORY\"," >> $METADATA_FILE
+        echo "  \"branch\": \"${GITHUB_REF#refs/heads/}\"," >> $METADATA_FILE
+        echo "  \"commit\": \"$GITHUB_SHA\"," >> $METADATA_FILE
+        echo "  \"archiveFile\": \"${ARCHIVE_NAME}\"," >> $METADATA_FILE
+        echo "  \"migrationDate\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"," >> $METADATA_FILE
+        echo "  \"migrationBy\": \"$GITHUB_ACTOR\"" >> $METADATA_FILE
+        echo '}' >> $METADATA_FILE
+        
+        aws s3 cp "${METADATA_FILE}" "s3://${AWS_S3_BUCKET}/${METADATA_FILE}"
+        echo "✅ Successfully uploaded metadata to s3://${AWS_S3_BUCKET}/${METADATA_FILE}"
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
