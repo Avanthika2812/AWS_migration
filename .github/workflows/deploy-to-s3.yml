@@ -63,6 +63,18 @@ jobs:
         aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws configure set region ${{ secrets.AWS_REGION }}
 
+    - name: Debugging S3 Bucket Name
+      run: |
+        echo "S3_BUCKET: '${{ secrets.AWS_S3_BUCKET }}'"
+        if [ -z "${{ secrets.AWS_S3_BUCKET }}" ]; then
+          echo "❌ AWS_S3_BUCKET secret is empty"
+          exit 1
+        else
+          echo "✅ AWS_S3_BUCKET is set correctly to '${{ secrets.AWS_S3_BUCKET }}'"
+        fi
+      env:
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+
     - name: Create archive of repository
       run: |
         REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
