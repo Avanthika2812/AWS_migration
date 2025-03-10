@@ -1,4 +1,4 @@
-name: Upload to S3
+name: Upload to S3 with AWS CLI
 on:
   push:
     branches:
@@ -6,18 +6,47 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
-      - name: Set AWS credentials
+      - name: Debug Environment Variables
         run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
-          echo "AWS_S3_BUCKET=myawsmigrate1" >> $GITHUB_ENV
+          echo "Environment variable check:"
+          if [ -n "$AWS_ACCESS_KEY_ID" ]; then
+            echo "AWS_ACCESS_KEY_ID is set"
+          else 
+            echo "AWS_ACCESS_KEY_ID is NOT set"
+          fi
+          
+          if [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "AWS_SECRET_ACCESS_KEY is set"
+          else
+            echo "AWS_SECRET_ACCESS_KEY is NOT set"
+          fi
       
-      - name: Deploy to S3
-        uses: jakejarvis/s3-sync-action@master
-        env:
-          SOURCE_DIR: '.'
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+      
+      - name: Sync to S3 directly with AWS CLI
+        run: |
+          if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "Starting sync to S3..."
+            aws s3 sync . s3://myawsmigrate1 --exclude ".git/*" --exclude ".github/*"
+            echo "Sync completed."
+          else
+            echo "AWS credentials are not set properly. Cannot proceed."
+            exit 1
+          fi
+      
+      - name: Verify S3 Upload
+        run: |
+          echo "Listing S3 bucket contents to verify upload:"
+          aws s3 ls s3://myawsmigrate1/ --summarize
