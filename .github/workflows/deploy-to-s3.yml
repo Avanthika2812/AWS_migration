@@ -3,41 +3,63 @@ on:
   push:
     branches:
       - main
+
 jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - name: Check secret availability
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Secret Availability
         run: |
           if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-            echo "AWS_ACCESS_KEY_ID is available (masked for security)"
+            echo "✅ AWS_ACCESS_KEY_ID is available (masked for security)"
           else
-            echo "AWS_ACCESS_KEY_ID is NOT available"
+            echo "❌ AWS_ACCESS_KEY_ID is NOT available"
+            exit 1
           fi
           
           if [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "AWS_SECRET_ACCESS_KEY is available (masked for security)"
+            echo "✅ AWS_SECRET_ACCESS_KEY is available (masked for security)"
           else
-            echo "AWS_SECRET_ACCESS_KEY is NOT available"
+            echo "❌ AWS_SECRET_ACCESS_KEY is NOT available"
+            exit 1
+          fi
+          
+          if [ -n "${{ secrets.AWS_REGION }}" ]; then
+            echo "✅ AWS_REGION is available: ${{ secrets.AWS_REGION }}"
+          else
+            echo "❌ AWS_REGION is NOT available"
+            exit 1
           fi
       
-      - name: Manually set AWS credentials
+      - name: Manually Set AWS Credentials as Environment Variables
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_REGION=us-east-1" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
           echo "AWS_S3_BUCKET=myawsmigrate1" >> $GITHUB_ENV
       
-      - name: Verify environment variables
+      - name: Verify Environment Variables
         run: |
           if [ -n "$AWS_ACCESS_KEY_ID" ]; then
-            echo "AWS_ACCESS_KEY_ID environment variable is set"
+            echo "✅ AWS_ACCESS_KEY_ID environment variable is set"
           else
-            echo "AWS_ACCESS_KEY_ID environment variable is NOT set"
+            echo "❌ AWS_ACCESS_KEY_ID environment variable is NOT set"
+            exit 1
           fi
           
           if [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
-            echo "AWS_SECRET_ACCESS_KEY environment variable is set"
+            echo "✅ AWS_SECRET_ACCESS_KEY environment variable is set"
           else
-            echo "AWS_SECRET_ACCESS_KEY environment variable is NOT set"
+            echo "❌ AWS_SECRET_ACCESS_KEY environment variable is NOT set"
+            exit 1
+          fi
+          
+          if [ -n "$AWS_REGION" ]; then
+            echo "✅ AWS_REGION is set: $AWS_REGION"
+          else
+            echo "❌ AWS_REGION is NOT set"
+            exit 1
           fi
