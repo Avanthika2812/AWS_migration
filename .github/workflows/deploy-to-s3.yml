@@ -27,10 +27,10 @@ jobs:
     - name: Verify AWS credentials
       run: |
         echo "Checking if AWS credentials exist:"
-        if [ -n "$AWS_ACCESS_KEY_ID" ]; then
-          echo "✅ AWS_ACCESS_KEY_ID secret exists"
+        if [ -n "$AWS_ACCESS_KEY" ]; then
+          echo "✅ AWS_ACCESS_KEY secret exists"
         else
-          echo "❌ AWS_ACCESS_KEY_ID secret is missing or empty"
+          echo "❌ AWS_ACCESS_KEY secret is missing or empty"
           exit 1
         fi
         if [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
@@ -52,7 +52,7 @@ jobs:
           exit 1
         fi
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
@@ -70,7 +70,7 @@ jobs:
         aws s3 cp "${ARCHIVE_NAME}" "s3://${AWS_S3_BUCKET}/${ARCHIVE_NAME}"
         echo "✅ Successfully uploaded ${ARCHIVE_NAME} to s3://${AWS_S3_BUCKET}/"
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
@@ -93,7 +93,7 @@ jobs:
         aws s3 cp "${METADATA_FILE}" "s3://${AWS_S3_BUCKET}/${METADATA_FILE}"
         echo "✅ Successfully uploaded metadata to s3://${AWS_S3_BUCKET}/${METADATA_FILE}"
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
