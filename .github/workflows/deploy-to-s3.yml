@@ -63,19 +63,13 @@ jobs:
         aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws configure set region ${{ secrets.AWS_REGION }}
 
-    - name: Compute File Integrity Checksums
-      run: |
-        echo "Generating file checksums before upload..."
-        find . -type f -not -path "./.git/*" -not -path "./node_modules/*" -exec sha256sum {} + > checksums.txt
-        aws s3 cp checksums.txt s3://myawsmigrate1/checksums.txt
-        echo "✅ Uploaded file checksums to S3."
-
     - name: Upload files to S3 maintaining folder structure
       run: |
         echo "Uploading repository contents to s3://myawsmigrate1/..."
+        # Recursively upload files and preserve folder structure
         aws s3 cp . s3://myawsmigrate1/ --recursive --exclude ".git/*" --exclude "node_modules/*"
         echo "✅ Successfully uploaded repository contents to s3://myawsmigrate1/"
-
+    
     - name: Create repository metadata file
       run: |
         REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 2)
@@ -92,23 +86,7 @@ jobs:
         
         aws s3 cp "${METADATA_FILE}" "s3://myawsmigrate1/${METADATA_FILE}"
         echo "✅ Successfully uploaded metadata to s3://myawsmigrate1/${METADATA_FILE}"
-
-    - name: Upload Workflow Logs to S3
-      if: always()
-      run: |
-        mkdir logs
-        cp $GITHUB_WORKSPACE/.github/workflows/migrate-to-s3.yml logs/
-        cp $GITHUB_WORKSPACE/.github/workflows/* logs/ || true
-        aws s3 cp logs/ s3://myawsmigrate1/logs/ --recursive
-        echo "✅ Successfully uploaded workflow logs to S3."
-
-    - name: Send Slack Notification
-      if: always()
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      run: |
-        STATUS="✅ Migration Succeeded"
-        if [ "$GITHUB_JOB_STATUS" != "success" ]; then
-          STATUS="❌ Migration Failed"
-        fi
-        curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$STATUS: Repository ${GITHUB_REPOSITORY} was migrated to S3.\nBranch: ${GITHUB_REF#refs/heads/}\nCommit: $GITHUB_SHA\nTriggered by: $GITHUB_ACTOR\"}" $SLACK_WEBHOOK_URL
+        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
