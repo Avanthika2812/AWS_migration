@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <!-- Background -->
+  <rect width="800" height="500" fill="#f9f9f9"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" font-family="Arial" font-size="24" text-anchor="middle" font-weight="bold">CloudFront + S3 Architecture for MEDKids</text>
+  
+  <!-- User -->
+  <circle cx="100" cy="150" r="30" fill="#e1e1e1" stroke="#333" stroke-width="2"/>
+  <text x="100" y="155" font-family="Arial" font-size="12" text-anchor="middle">Users</text>
+  
+  <!-- CloudFront -->
+  <rect x="300" y="120" width="120" height="60" rx="10" ry="10" fill="#FF9900" stroke="#333" stroke-width="2"/>
+  <text x="360" y="155" font-family="Arial" font-size="14" text-anchor="middle" fill="white">CloudFront</text>
+  
+  <!-- Edge Locations -->
+  <circle cx="250" cy="90" r="20" fill="#FFD699" stroke="#333" stroke-width="2"/>
+  <text x="250" y="95" font-family="Arial" font-size="10" text-anchor="middle">Edge</text>
+  
+  <circle cx="300" cy="70" r="20" fill="#FFD699" stroke="#333" stroke-width="2"/>
+  <text x="300" y="75" font-family="Arial" font-size="10" text-anchor="middle">Edge</text>
+  
+  <circle cx="350" cy="60" r="20" fill="#FFD699" stroke="#333" stroke-width="2"/>
+  <text x="350" y="65" font-family="Arial" font-size="10" text-anchor="middle">Edge</text>
+  
+  <circle cx="400" cy="70" r="20" fill="#FFD699" stroke="#333" stroke-width="2"/>
+  <text x="400" y="75" font-family="Arial" font-size="10" text-anchor="middle">Edge</text>
+  
+  <circle cx="450" cy="90" r="20" fill="#FFD699" stroke="#333" stroke-width="2"/>
+  <text x="450" y="95" font-family="Arial" font-size="10" text-anchor="middle">Edge</text>
+  
+  <!-- S3 Bucket -->
+  <rect x="550" y="120" width="120" height="60" rx="10" ry="10" fill="#569AC8" stroke="#333" stroke-width="2"/>
+  <text x="610" y="155" font-family="Arial" font-size="14" text-anchor="middle" fill="white">S3 Bucket</text>
+  
+  <!-- WordPress Sites -->
+  <rect x="300" y="250" width="120" height="60" rx="10" ry="10" fill="#21759b" stroke="#333" stroke-width="2"/>
+  <text x="360" y="285" font-family="Arial" font-size="14" text-anchor="middle" fill="white">WordPress</text>
+  <text x="360" y="305" font-family="Arial" font-size="12" text-anchor="middle" fill="white">Production</text>
+  
+  <rect x="450" y="250" width="120" height="60" rx="10" ry="10" fill="#21759b" stroke="#333" stroke-width="2"/>
+  <text x="510" y="285" font-family="Arial" font-size="14" text-anchor="middle" fill="white">WordPress</text>
+  <text x="510" y="305" font-family="Arial" font-size="12" text-anchor="middle" fill="white">Staging</text>
+  
+  <!-- GitHub -->
+  <rect x="380" y="370" width="120" height="60" rx="10" ry="10" fill="#333" stroke="#333" stroke-width="2"/>
+  <text x="440" y="405" font-family="Arial" font-size="14" text-anchor="middle" fill="white">GitHub</text>
+  <text x="440" y="425" font-family="Arial" font-size="12" text-anchor="middle" fill="white">Code Repository</text>
+  
+  <!-- Connections -->
+  <!-- User to CloudFront -->
+  <line x1="130" y1="150" x2="300" y2="150" stroke="#333" stroke-width="2"/>
+  <polygon points="295,145 305,150 295,155" fill="#333"/>
+  
+  <!-- CloudFront to S3 -->
+  <line x1="420" y1="150" x2="550" y2="150" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+  <polygon points="545,145 555,150 545,155" fill="#333"/>
+  <text x="485" y="140" font-family="Arial" font-size="12" text-anchor="middle">Origin</text>
+  
+  <!-- CloudFront to Edge -->
+  <line x1="325" y1="120" x2="257" y2="97" stroke="#333" stroke-width="1"/>
+  <line x1="345" y1="120" x2="305" y2="85" stroke="#333" stroke-width="1"/>
+  <line x1="370" y1="120" x2="350" y2="80" stroke="#333" stroke-width="1"/>
+  <line x1="395" y1="120" x2="400" y2="90" stroke="#333" stroke-width="1"/>
+  <line x1="415" y1="120" x2="445" y2="97" stroke="#333" stroke-width="1"/>
+  
+  <!-- CloudFront to WordPress -->
+  <line x1="360" y1="180" x2="360" y2="250" stroke="#333" stroke-width="2"/>
+  <polygon points="355,245 360,255 365,245" fill="#333"/>
+  
+  <!-- WordPress to GitHub -->
+  <line x1="370" y1="310" x2="420" y2="370" stroke="#333" stroke-width="2"/>
+  <polygon points="415,365 425,375 425,365" fill="#333"/>
+  
+  <!-- Legend -->
+  <rect x="600" y="330" width="180" height="120" fill="white" stroke="#333" stroke-width="1"/>
+  <text x="690" y="350" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">Legend</text>
+  
+  <rect x="620" y="365" width="20" height="20" fill="#FF9900"/>
+  <text x="645" y="380" font-family="Arial" font-size="12" text-anchor="start">CloudFront</text>
+  
+  <rect x="620" y="395" width="20" height="20" fill="#569AC8"/>
+  <text x="645" y="410" font-family="Arial" font-size="12" text-anchor="start">S3 Storage</text>
+  
+  <rect x="620" y="425" width="20" height="20" fill="#21759b"/>
+  <text x="645" y="440" font-family="Arial" font-size="12" text-anchor="start">WordPress Sites</text>
+  
+  <!-- Data Flow Description -->
+  <rect x="50" y="330" width="200" height="150" fill="white" stroke="#333" stroke-width="1"/>
+  <text x="150" y="350" font-family="Arial" font-size="14" text-anchor="middle" font-weight="bold">Data Flow</text>
+  <text x="150" y="375" font-family="Arial" font-size="10" text-anchor="middle">1. Assets uploaded to S3</text>
+  <text x="150" y="395" font-family="Arial" font-size="10" text-anchor="middle">2. CloudFront caches from S3</text>
+  <text x="150" y="415" font-family="Arial" font-size="10" text-anchor="middle">3. WordPress references</text>
+  <text x="150" y="435" font-family="Arial" font-size="10" text-anchor="middle">   CloudFront URLs</text>
+  <text x="150" y="455" font-family="Arial" font-size="10" text-anchor="middle">4. Users access content via</text>
+  <text x="150" y="475" font-family="Arial" font-size="10" text-anchor="middle">   nearest edge location</text>
+</svg>
